@@ -1,5 +1,6 @@
 package tedford
 
+import scala.math.BigDecimal.RoundingMode
 
 abstract class FoodType
 case class Drink() extends FoodType
@@ -25,7 +26,14 @@ object Bill {
 	)
 
 	def main(args: Array[String]): Unit = {
-		println("Hello World")
+		while(true){
+			println("Please enter the bill items as a comma seperate list ie 'Coffie, Cheese Sandwich'")
+			val ln = readLine()
+			val ln2 = ln.replaceAll(" ", "")
+			val items = ln2.split(",").toList;
+			val price = cacluratePriceInput(items);
+			println(price);
+		}
 	}
 
 	/**
@@ -70,9 +78,11 @@ object Bill {
 	protected def calculatePriceWithServiceChange (cart: List[Item]): BigDecimal = {
 		val basePrice = calculatePrice (cart);
 
-		val calculatedServiecChange = calculateServiceChange(cart)
+		val calculatedServiceChange = calculateServiceChange(cart)
 
-		return basePrice + calculatedServiecChange
+		val result = basePrice + calculatedServiceChange
+
+		return result
 	}
 
 	/**
@@ -97,7 +107,7 @@ object Bill {
 		) 
 		isHotFood match {
 			case Some(_) => if ((basePrice * BigDecimal("0.2")) <= BigDecimal(20)) {
-				return basePrice * 0.2
+				return (basePrice * 0.2).setScale(2, RoundingMode.HALF_EVEN)
 			} else {
 				return BigDecimal("20")
 			}
@@ -106,6 +116,7 @@ object Bill {
 
 		cart.find(item => item.foodType.isInstanceOf[Food]) match {
 			case Some(_) => return basePrice * BigDecimal("0.1")
+				.setScale(2, RoundingMode.HALF_EVEN)
 			case None => 
 		}
 
