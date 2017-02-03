@@ -21,6 +21,9 @@ class BillSpec extends Specification {
 
 	[Cola, Coffie, Cheese Sandwich] Bill should return 3.5 	$mixtureBill
 
+	[Steak Sandwich * 100] Bill should return 470	$maxBill
+
+
 	Invalid bill should return None				$invalidBill
 	"""
 
@@ -37,15 +40,19 @@ class BillSpec extends Specification {
 	}
 
 	def cheeseSandwichBill = {
-		Bill.cacluratePriceInput(List("Cheese Sandwich")) must beEqualTo(Some(BigDecimal("2.0")))
+		Bill.cacluratePriceInput(List("Cheese Sandwich")) must beEqualTo(Some(BigDecimal("2.2")))
 	}
 
 	def steakSandwichBill = {
-		Bill.cacluratePriceInput(List("Steak Sandwich")) must beEqualTo(Some(BigDecimal("4.5")))
+		Bill.cacluratePriceInput(List("Steak Sandwich")) must beEqualTo(Some(BigDecimal("5.4")))
 	}
 
 	def mixtureBill = {
-		Bill.cacluratePriceInput(List("Cola", "Coffie", "Cheese Sandwich")) must beEqualTo(Some(BigDecimal("3.5")))
+		Bill.cacluratePriceInput(List("Cola", "Coffie", "Cheese Sandwich")) must beEqualTo(Some(BigDecimal("3.85")))
+	}
+
+	def maxBill = {
+		Bill.cacluratePriceInput(List.fill(100)("Steak Sandwich")) must beEqualTo(Some(BigDecimal("470")))
 	}
 
 	def invalidBill = {

@@ -1,18 +1,27 @@
 package tedford
 
-class Item (val name: String, val price: BigDecimal) {}
+
+abstract class FoodType
+case class Drink() extends FoodType
+case class Food() extends FoodType
+case class HotFood() extends FoodType
+
+
+class Item (val name: String, val price: BigDecimal, val foodType: FoodType ) {}
+
 
 object Item {
-	def apply (name: String, price: BigDecimal): Item = new Item(name, price)
+	def apply (name: String, price: BigDecimal, foodType: FoodType): Item = 
+		new Item(name, price, foodType)
 }
 
 object Bill {
 
 	val items: Map[String, Item] = Map(
-		"Cola" -> Item("Cola", BigDecimal("0.50")),
-		"Coffie" -> Item("Coffie", BigDecimal("1.00")),
-		"Cheese Sandwich" -> Item("Cheese Sandwich", BigDecimal("2.00")),
-		"Steak Sandwich" -> Item("Steak Sandwich", BigDecimal("4.50"))
+		"Cola" -> Item("Cola", BigDecimal("0.50"), Drink()),
+		"Coffie" -> Item("Coffie", BigDecimal("1.00"), Drink()),
+		"Cheese Sandwich" -> Item("Cheese Sandwich", BigDecimal("2.00"), Food()),
+		"Steak Sandwich" -> Item("Steak Sandwich", BigDecimal("4.50"), HotFood())
 	)
 
 	def main(args: Array[String]): Unit = {
@@ -30,7 +39,7 @@ object Bill {
 
 		cartTyped match {
 			case None => None
-			case Some(items) => Some(calculatePrice(items))
+			case Some(items) => Some(calculatePriceWithServiceChange(items))
 		}
 	}
 
@@ -56,13 +65,51 @@ object Bill {
 	}
 
 	/**
+	Calculates the price including the service change
+	*/
+	protected def calculatePriceWithServiceChange (cart: List[Item]): BigDecimal = {
+		val basePrice = calculatePrice (cart);
+
+		val calculatedServiecChange = calculateServiceChange(cart)
+
+		return basePrice + calculatedServiecChange
+	}
+
+	/**
 	Caculates the price
 	*/
 	protected def calculatePrice (cart: List[Item]): BigDecimal = {
 		val cartPrice: BigDecimal = cart.foldRight[BigDecimal](BigDecimal("0.0")) {
 			(item, a) => item.price + a
 		}
+
 		return cartPrice
+	}
+
+	/**
+	Caclulates the service change
+	*/
+	protected def calculateServiceChange (cart: List[Item]): BigDecimal = {
+		val basePrice = calculatePrice(cart)
+
+		val isHotFood = cart.find(item => 
+			item.foodType.isInstanceOf[HotFood]
+		) 
+		isHotFood match {
+			case Some(_) => if ((basePrice * BigDecimal("0.2")) <= BigDecimal(20)) {
+				return basePrice * 0.2
+			} else {
+				return BigDecimal("20")
+			}
+			case None => 
+		}
+
+		cart.find(item => item.foodType.isInstanceOf[Food]) match {
+			case Some(_) => return basePrice * BigDecimal("0.1")
+			case None => 
+		}
+
+		return 0.0
 	}
 
 }
